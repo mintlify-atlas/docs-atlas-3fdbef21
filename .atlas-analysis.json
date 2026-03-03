@@ -1,0 +1,59 @@
+{
+  "projectType": "frontend",
+  "projectName": "KMUTNB Mobile App",
+  "projectDescription": "A Flutter mobile application providing access to the KMUTNB university website and interactive campus map",
+  "theme": "palm",
+  "primaryColor": "#FF9800",
+  "lightColor": "#FFB74D",
+  "darkColor": "#F57C00",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Features",
+        "pages": [
+          "features/webview",
+          "features/map",
+          "features/navigation"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "configuration/google-maps",
+          "configuration/theme",
+          "configuration/android-setup",
+          "configuration/ios-setup"
+        ]
+      },
+      {
+        "group": "Development",
+        "pages": [
+          "development/project-structure",
+          "development/screens",
+          "development/dependencies",
+          "development/building"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "WebView integration for KMUTNB university website",
+    "Google Maps integration with campus location marker",
+    "Material Design 3 UI with custom theming",
+    "Bottom navigation between screens"
+  ],
+  "publicApiSurface": [
+    "MyApp - Main application widget",
+    "MainScreen - Root screen with bottom navigation",
+    "WebViewScreen - KMUTNB website viewer",
+    "MapScreen - Interactive campus map"
+  ]
+}
