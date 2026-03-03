@@ -1,0 +1,131 @@
+---
+title: Google Maps setup
+description: Configure Google Maps API key for the KMUTNB Mobile App to enable campus map functionality
+---
+
+The KMUTNB Mobile App uses Google Maps to display the Faculty of Technology and Management location. You need to obtain a Google Maps API key and configure it for both Android and iOS platforms.
+
+## Getting a Google Maps API key
+
+<Steps>
+  <Step title="Create a Google Cloud project">
+    Navigate to the [Google Cloud Console](https://console.cloud.google.com/) and sign in with your Google account. Create a new project or select an existing one.
+  </Step>
+  
+  <Step title="Enable the Maps SDK">
+    In your Google Cloud project, enable the following APIs:
+    - Maps SDK for Android
+    - Maps SDK for iOS
+    
+    Go to "APIs & Services" > "Library" and search for these APIs to enable them.
+  </Step>
+  
+  <Step title="Create API credentials">
+    Navigate to "APIs & Services" > "Credentials" and click "Create Credentials" > "API Key". Your new API key will be generated.
+  </Step>
+  
+  <Step title="Restrict your API key (recommended)">
+    Click on your API key to configure restrictions:
+    - For Android: Add application restrictions using your package name and SHA-1 certificate fingerprint
+    - For iOS: Add iOS app restrictions using your bundle identifier
+  </Step>
+</Steps>
+
+<Warning>
+  Never commit your API key to version control or share it publicly. Consider using environment variables or secure configuration management for production apps.
+</Warning>
+
+## Android configuration
+
+For Android, you need to add your API key to the `AndroidManifest.xml` file.
+
+### Location
+
+```
+android/app/src/main/AndroidManifest.xml
+```
+
+### Adding the API key
+
+Open `android/app/src/main/AndroidManifest.xml` and locate the Google Maps API key meta-data tag inside the `<application>` section:
+
+```xml
+<!-- Google Maps API Key -->
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_API_KEY_HERE" />
+```
+
+Replace `YOUR_API_KEY_HERE` with your actual Google Maps API key:
+
+```xml
+<!-- Google Maps API Key -->
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+```
+
+### Required permissions
+
+The app already includes the necessary permissions in the manifest:
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+These permissions allow the app to:
+- Access precise location (for map centering)
+- Access approximate location (for general area)
+- Connect to the internet (to load map tiles)
+
+## iOS configuration
+
+For iOS, you need to add your API key to the `AppDelegate.swift` file.
+
+### Location
+
+```
+ios/Runner/AppDelegate.swift
+```
+
+### Adding the API key
+
+Open `ios/Runner/AppDelegate.swift` and add the Google Maps API key configuration in the `application(_:didFinishLaunchingWithOptions:)` method:
+
+```swift
+import UIKit
+import Flutter
+import GoogleMaps
+
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    GMSServices.provideAPIKey("YOUR_API_KEY_HERE")
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+```
+
+Replace `YOUR_API_KEY_HERE` with your actual Google Maps API key.
+
+<Tip>
+  After adding your API key, run `flutter clean` and rebuild your app to ensure the changes are properly applied.
+</Tip>
+
+## Verifying the setup
+
+After configuring your API key:
+
+1. Run `flutter pub get` to ensure all dependencies are installed
+2. Build and run the app on your device or emulator
+3. Navigate to the "Map" tab in the bottom navigation
+4. You should see the Google Map displaying the Faculty of Technology and Management location at coordinates (14.159051, 101.345455)
+5. Use the floating action button to recenter the map on the faculty location
+
+If the map doesn't load, check your API key configuration and ensure you've enabled the correct APIs in Google Cloud Console.

@@ -1,0 +1,83 @@
+---
+title: Project structure
+description: Learn about the directory structure and organization of the KMUTNB Mobile App codebase
+---
+
+The KMUTNB Mobile App follows a standard Flutter project structure with organized directories for source code, configuration, and platform-specific files.
+
+## Directory overview
+
+The project is organized into the following main directories:
+
+```
+kmutnb-app/
+├── lib/                    # Main source code directory
+│   ├── main.dart          # Application entry point
+│   └── screens/           # Screen widgets
+│       ├── webview_screen.dart
+│       └── map_screen.dart
+├── android/               # Android-specific configuration
+├── ios/                   # iOS-specific configuration
+├── pubspec.yaml          # Project dependencies and metadata
+└── analysis_options.yaml # Dart analyzer configuration
+```
+
+<Info>
+The `lib/` directory contains all the Dart source code for your application. This is where you'll spend most of your development time.
+</Info>
+
+## The lib/ directory
+
+The `lib/` directory is the heart of your Flutter application. It contains the application entry point and all screen implementations.
+
+### main.dart - Entry point
+
+The `main.dart` file (lib/main.dart:1) is the application entry point. It contains:
+
+- **main() function**: Launches the app with `runApp(const MyApp())`
+- **MyApp widget**: Root widget that configures the MaterialApp with theme and navigation
+- **MainScreen widget**: Stateful widget that manages bottom navigation between screens
+
+The entry point initializes a Material 3 themed app with an orange color scheme:
+
+```dart
+void main() {
+  runApp(const MyApp());
+}
+```
+
+### screens/ directory
+
+<Info>
+The `screens/` directory contains all the screen widgets that users navigate to. Each screen is a self-contained widget with its own state management.
+</Info>
+
+The app currently has two main screens:
+
+**webview_screen.dart** - Displays the KMUTNB website (https://kmutnb.ac.th/) in an embedded WebView with full JavaScript support and navigation handling.
+
+**map_screen.dart** - Shows an interactive Google Maps view centered on the Faculty of Technology and Management location (coordinates: 14.159051, 101.345455) with a marker and re-center button.
+
+## Configuration files
+
+### pubspec.yaml
+
+Defines project metadata, dependencies, SDK constraints, and Flutter-specific configuration. The app requires Dart SDK `>=3.6.0 <4.0.0` and includes dependencies for maps, location, WebView, and networking.
+
+### analysis_options.yaml
+
+Configures the Dart static analyzer to enforce code quality standards. The project uses the `flutter_lints` package with recommended lints for Flutter apps to encourage good coding practices.
+
+## Platform directories
+
+<Info>
+The `android/` and `ios/` directories contain platform-specific configuration files. You'll need to configure Google Maps API keys in these directories for the map functionality to work.
+</Info>
+
+### Android configuration
+
+The `android/` directory contains Gradle build files and the AndroidManifest.xml where you configure permissions and API keys.
+
+### iOS configuration
+
+The `ios/` directory contains Xcode project files and the AppDelegate where you configure iOS-specific settings and API keys.

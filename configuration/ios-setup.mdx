@@ -1,0 +1,233 @@
+---
+title: iOS setup
+description: Configure the KMUTNB Mobile App for iOS deployment with required SDKs and permissions
+---
+
+This guide covers the iOS-specific configuration needed to build and run the KMUTNB Mobile App on iOS devices and simulators.
+
+<Note>
+  iOS development requires a Mac with Xcode installed. You cannot build iOS apps on Windows or Linux.
+</Note>
+
+## Requirements
+
+Before setting up iOS, ensure you have:
+
+- Flutter SDK 3.7.0 or higher
+- Dart SDK 3.7.0 or higher
+- macOS (for iOS development)
+- Xcode 12.0 or higher
+- CocoaPods (installed automatically with Xcode)
+- Apple Developer account (for physical device testing and App Store deployment)
+
+## iOS SDK setup
+
+<Steps>
+  <Step title="Install Xcode">
+    Download and install [Xcode](https://developer.apple.com/xcode/) from the Mac App Store. This includes the iOS SDK, iOS Simulator, and necessary build tools.
+  </Step>
+  
+  <Step title="Install Xcode command-line tools">
+    Open Terminal and run:
+    ```bash
+    sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+    sudo xcodebuild -runFirstLaunch
+    ```
+  </Step>
+  
+  <Step title="Accept Xcode license">
+    Run the following command and accept the license agreement:
+    ```bash
+    sudo xcodebuild -license accept
+    ```
+  </Step>
+  
+  <Step title="Configure Flutter">
+    Run `flutter doctor` in your terminal to verify that Flutter can detect your Xcode installation. Address any issues reported.
+  </Step>
+  
+  <Step title="Set up an iOS device or simulator">
+    Either:
+    - Connect a physical iOS device via USB and trust the computer
+    - Launch iOS Simulator from Xcode or using `open -a Simulator`
+    
+    Verify devices are detected with `flutter devices`.
+  </Step>
+</Steps>
+
+## AppDelegate configuration
+
+The iOS app configuration is managed through the `AppDelegate.swift` file located at:
+
+```
+ios/Runner/AppDelegate.swift
+```
+
+### Adding Google Maps API key
+
+You need to configure the Google Maps API key in the AppDelegate file. Import the GoogleMaps framework and provide your API key:
+
+```swift
+import UIKit
+import Flutter
+import GoogleMaps
+
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    // Provide your Google Maps API key
+    GMSServices.provideAPIKey("YOUR_API_KEY_HERE")
+    
+    GeneratedPluginRegistrant.register(with: self)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+}
+```
+
+Replace `YOUR_API_KEY_HERE` with your actual Google Maps API key from Google Cloud Console. See the [Google Maps setup](/configuration/google-maps) guide for detailed instructions on obtaining an API key.
+
+### Info.plist configuration
+
+The `Info.plist` file (located at `ios/Runner/Info.plist`) contains important app configuration. You may need to add location permission descriptions:
+
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to your location to show the campus map.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>This app needs access to your location to show the campus map.</string>
+```
+
+These descriptions are displayed to users when the app requests location permissions.
+
+## Installing CocoaPods dependencies
+
+The Google Maps Flutter plugin requires native iOS dependencies managed by CocoaPods:
+
+```bash
+cd ios
+pod install
+cd ..
+```
+
+This installs the Google Maps SDK for iOS and other required native frameworks.
+
+<Tip>
+  If you encounter CocoaPods issues, try updating it with `sudo gem install cocoapods` or run `pod repo update` to refresh the CocoaPods specs repository.
+</Tip>
+
+## Building for iOS
+
+### Development build
+
+To build and run the app in debug mode on a simulator:
+
+```bash
+flutter run
+```
+
+Or specify the iOS device:
+
+```bash
+flutter run -d iPhone
+```
+
+### Running on a physical device
+
+To run on a physical iOS device:
+
+1. Connect your iOS device via USB
+2. Open the iOS project in Xcode:
+   ```bash
+   open ios/Runner.xcworkspace
+   ```
+3. Select your device in the Xcode device menu
+4. Configure code signing with your Apple Developer account in **Signing & Capabilities**
+5. Run the app from Flutter:
+   ```bash
+   flutter run -d <device-id>
+   ```
+
+<Note>
+  Physical device testing requires an Apple Developer account. Free accounts can test apps for 7 days before needing to rebuild. Paid developer accounts ($99/year) allow longer testing periods and App Store distribution.
+</Note>
+
+### Release build
+
+To create a release build for distribution:
+
+```bash
+flutter build ios --release
+```
+
+For App Store submission, you'll need to create an archive in Xcode:
+
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. Select **Product** > **Archive**
+3. Use the Organizer to distribute your app to the App Store or TestFlight
+
+## iOS simulator vs device testing
+
+### Simulator testing
+
+The iOS Simulator provides:
+- Fast testing without a physical device
+- Multiple device types and iOS versions
+- Free to use (no Apple Developer account required)
+
+**Limitations:**
+- Cannot test location services with real GPS data
+- Limited hardware sensor simulation
+- Performance may differ from physical devices
+
+### Physical device testing
+
+Testing on a real device provides:
+- Accurate location services and GPS functionality
+- Real hardware performance
+- Actual sensor data (accelerometer, gyroscope, etc.)
+- True touch and gesture behavior
+
+<Note>
+  For testing the Google Maps functionality in the KMUTNB app, the iOS Simulator works well for basic map display. However, testing on a physical device is recommended for location-based features and accurate performance assessment.
+</Note>
+
+## Troubleshooting
+
+### Map not displaying
+
+If the Google Map doesn't display:
+1. Verify your API key is correctly added to AppDelegate.swift
+2. Check that Maps SDK for iOS is enabled in Google Cloud Console
+3. Ensure your API key restrictions allow your app's bundle identifier
+4. Run `pod install` in the ios directory
+5. Run `flutter clean` and rebuild the app
+
+### CocoaPods errors
+
+If you encounter CocoaPods issues:
+1. Update CocoaPods: `sudo gem install cocoapods`
+2. Update the repository: `pod repo update`
+3. Clean the pods: `cd ios && rm -rf Pods Podfile.lock && pod install`
+4. Rebuild the app: `flutter clean && flutter pub get`
+
+### Code signing errors
+
+If you encounter code signing issues:
+1. Open `ios/Runner.xcworkspace` in Xcode
+2. Select the Runner target
+3. Go to **Signing & Capabilities**
+4. Select your team from the dropdown
+5. Xcode will automatically manage provisioning profiles
+
+### Build failures
+
+If builds fail:
+1. Run `flutter doctor` to check for issues
+2. Run `flutter clean` to clear build cache
+3. Update Flutter and dependencies: `flutter pub upgrade`
+4. Ensure Xcode is up to date in the Mac App Store
+5. Try deleting derived data: `rm -rf ~/Library/Developer/Xcode/DerivedData`

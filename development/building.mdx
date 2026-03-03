@@ -1,0 +1,274 @@
+---
+title: Building
+description: Learn how to build and compile the KMUTNB Mobile App for Android and iOS platforms
+---
+
+This guide walks you through building the KMUTNB Mobile App for different platforms and build configurations.
+
+<Warning>
+Before building the app, you must configure Google Maps API keys in the Android and iOS configuration files. The map feature will not work without valid API keys.
+
+Get your API key from the [Google Cloud Console](https://console.cloud.google.com/) and add it to:
+- **Android**: `android/app/src/main/AndroidManifest.xml`
+- **iOS**: `ios/Runner/AppDelegate.swift`
+</Warning>
+
+## Prerequisites
+
+Before building, ensure you have:
+
+<Steps>
+  <Step title="Install Flutter SDK">
+    Flutter SDK 3.7.0 or higher installed and added to your PATH
+    
+    ```bash
+    flutter --version
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    Run `flutter pub get` to download all required packages
+    
+    ```bash
+    flutter pub get
+    ```
+  </Step>
+  
+  <Step title="Verify setup">
+    Check that your environment is properly configured
+    
+    ```bash
+    flutter doctor
+    ```
+    
+    Fix any issues reported by Flutter Doctor before proceeding.
+  </Step>
+</Steps>
+
+## Build modes
+
+Flutter supports three build modes:
+
+### Debug mode
+
+Used during development. Includes debugging information, hot reload support, and assertions. Larger app size and slower performance.
+
+### Release mode
+
+Optimized for production. Removes debugging information, enables optimizations, and minimizes app size. This is what you'll publish to app stores.
+
+### Profile mode
+
+Similar to release mode but retains some debugging capabilities for performance profiling. Used to analyze app performance.
+
+## Building for Android
+
+<Tabs>
+  <Tab title="Debug build">
+    Build a debug APK for testing:
+    
+    ```bash
+    flutter build apk --debug
+    ```
+    
+    Or run directly on a connected device:
+    
+    ```bash
+    flutter run
+    ```
+    
+    The debug APK will be generated at:
+    ```
+    build/app/outputs/flutter-apk/app-debug.apk
+    ```
+  </Tab>
+  
+  <Tab title="Release build">
+    Build a release APK for production:
+    
+    ```bash
+    flutter build apk --release
+    ```
+    
+    For better optimization, build an App Bundle (recommended for Play Store):
+    
+    ```bash
+    flutter build appbundle --release
+    ```
+    
+    **Output locations**:
+    - APK: `build/app/outputs/flutter-apk/app-release.apk`
+    - App Bundle: `build/app/outputs/bundle/release/app-release.aab`
+    
+    <Info>
+    App Bundles (.aab) are the recommended format for Google Play Store as they enable Play Store to generate optimized APKs for different device configurations.
+    </Info>
+  </Tab>
+  
+  <Tab title="Split APKs">
+    Build separate APKs per ABI for smaller download sizes:
+    
+    ```bash
+    flutter build apk --split-per-abi
+    ```
+    
+    This generates multiple APKs:
+    - `app-armeabi-v7a-release.apk` (32-bit ARM)
+    - `app-arm64-v8a-release.apk` (64-bit ARM)
+    - `app-x86_64-release.apk` (64-bit Intel)
+    
+    Each APK is optimized for specific device architectures.
+  </Tab>
+</Tabs>
+
+## Building for iOS
+
+<Warning>
+Building for iOS requires a Mac with Xcode installed. You also need an Apple Developer account to deploy to physical devices or the App Store.
+</Warning>
+
+<Tabs>
+  <Tab title="Debug build">
+    Run on iOS simulator or connected device:
+    
+    ```bash
+    flutter run
+    ```
+    
+    Build debug iOS app:
+    
+    ```bash
+    flutter build ios --debug
+    ```
+  </Tab>
+  
+  <Tab title="Release build">
+    Build a release iOS app:
+    
+    ```bash
+    flutter build ios --release
+    ```
+    
+    Or build an IPA for App Store distribution:
+    
+    ```bash
+    flutter build ipa
+    ```
+    
+    The IPA will be generated at:
+    ```
+    build/ios/ipa/fin_1.ipa
+    ```
+    
+    <Info>
+    You'll need to configure code signing in Xcode before building for physical devices or App Store submission.
+    </Info>
+  </Tab>
+  
+  <Tab title="Xcode build">
+    You can also build using Xcode directly:
+    
+    <Steps>
+      <Step title="Open Xcode project">
+        ```bash
+        open ios/Runner.xcworkspace
+        ```
+      </Step>
+      
+      <Step title="Select target device">
+        Choose your device or simulator from the device menu
+      </Step>
+      
+      <Step title="Build and run">
+        Click the Play button or press Cmd+R
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Running the app
+
+For development, use the `flutter run` command:
+
+```bash
+flutter run
+```
+
+This launches the app in debug mode with hot reload enabled. Make code changes and press `r` to hot reload or `R` to hot restart.
+
+### Select target device
+
+List available devices:
+
+```bash
+flutter devices
+```
+
+Run on a specific device:
+
+```bash
+flutter run -d <device_id>
+```
+
+## Testing
+
+Run all tests before building for production:
+
+```bash
+flutter test
+```
+
+This executes unit tests and widget tests using the `flutter_test` framework.
+
+## Code quality checks
+
+Run static analysis to check for issues:
+
+```bash
+flutter analyze
+```
+
+This uses the lint rules defined in `analysis_options.yaml` with the `flutter_lints` package to ensure code quality.
+
+## Build optimization tips
+
+<Steps>
+  <Step title="Clean build directory">
+    If you encounter build issues, clean the build cache:
+    
+    ```bash
+    flutter clean
+    flutter pub get
+    ```
+  </Step>
+  
+  <Step title="Optimize for size">
+    Use `--split-per-abi` for Android to reduce APK size
+  </Step>
+  
+  <Step title="Enable obfuscation">
+    For release builds, add obfuscation to protect your code:
+    
+    ```bash
+    flutter build apk --release --obfuscate --split-debug-info=build/debug-info
+    ```
+  </Step>
+  
+  <Step title="Test on real devices">
+    Always test release builds on physical devices before publishing
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+### Google Maps not displaying
+
+Ensure you've added valid API keys to the platform configuration files. Check the Android logcat or iOS console for API key errors.
+
+### Build failures
+
+Run `flutter doctor` to identify environment issues and `flutter clean` to clear build artifacts.
+
+### Dependency conflicts
+
+Update dependencies with `flutter pub upgrade` and resolve any version conflicts in `pubspec.yaml`.

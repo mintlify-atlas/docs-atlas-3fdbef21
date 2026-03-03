@@ -1,0 +1,143 @@
+---
+title: Bottom navigation system
+description: Understand how the KMUTNB Mobile App implements tab-based navigation with state preservation
+---
+
+## Overview
+
+The KMUTNB Mobile App uses a bottom navigation bar to switch between two main sections: the Home tab (WebView) and the Map tab. The navigation system is designed to preserve the state of each screen when switching between tabs.
+
+## MainScreen implementation
+
+The `MainScreen` widget in `lib/main.dart` serves as the container for the app's navigation system:
+
+```dart
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+```
+
+## Navigation state management
+
+The navigation system tracks the currently selected tab index and maintains a list of screen widgets:
+
+```dart
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+  final List<Widget> _screens = [
+    const WebViewScreen(),
+    const MapScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+}
+```
+
+### State variables
+
+- **_selectedIndex**: Tracks which tab is currently active (0 for Home, 1 for Map)
+- **_screens**: Contains the widget instances for each tab
+- **_onItemTapped**: Callback function that updates the selected tab when you tap a navigation item
+
+## IndexedStack for state preservation
+
+The app uses `IndexedStack` to maintain the state of each screen when switching tabs:
+
+```dart
+body: IndexedStack(
+  index: _selectedIndex,
+  children: _screens,
+),
+```
+
+<Note>
+  `IndexedStack` is crucial for state preservation. Unlike a simple widget switcher, it keeps all child widgets in memory and only displays the one at the current index. This means your WebView scroll position and map zoom level are preserved when you switch tabs.
+</Note>
+
+### Why IndexedStack?
+
+Without `IndexedStack`, switching tabs would destroy and recreate the screens, causing:
+- The WebView to reload the KMUTNB website from scratch
+- The map to reset to its initial position
+- Loss of any user interactions or navigation within each screen
+
+<Tip>
+  Try scrolling down on the KMUTNB website, switching to the Map tab, and then returning to Home. You'll notice you're still at the same scroll position thanks to `IndexedStack`.
+</Tip>
+
+## BottomNavigationBar configuration
+
+The bottom navigation bar displays two tabs with icons and labels:
+
+```dart
+bottomNavigationBar: BottomNavigationBar(
+  items: const <BottomNavigationBarItem>[
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.map),
+      label: 'Map',
+    ),
+  ],
+  currentIndex: _selectedIndex,
+  selectedItemColor: Colors.amber[800],
+  onTap: _onItemTapped,
+),
+```
+
+### Navigation items
+
+1. **Home tab**
+   - Icon: `Icons.home`
+   - Label: "Home"
+   - Content: WebViewScreen displaying the KMUTNB website
+
+2. **Map tab**
+   - Icon: `Icons.map`
+   - Label: "Map"
+   - Content: MapScreen showing the campus location
+
+### Visual styling
+
+- **currentIndex**: Highlights the active tab
+- **selectedItemColor**: Sets the active tab color to amber (Colors.amber[800])
+- **onTap**: Handles tab selection through the `_onItemTapped` callback
+
+## App bar
+
+The app includes a consistent app bar across all screens:
+
+```dart
+appBar: AppBar(
+  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+  title: const Text('KMUTNB App'),
+),
+```
+
+<Info>
+  The app bar title "KMUTNB App" remains visible regardless of which tab is active, providing consistent branding throughout the app.
+</Info>
+
+## Complete navigation flow
+
+Here's how the navigation system works when you tap a tab:
+
+1. You tap on a navigation item in the bottom bar
+2. The `onTap` callback triggers `_onItemTapped(index)`
+3. `setState()` updates `_selectedIndex` with the new tab index
+4. The `IndexedStack` displays the widget at the new index
+5. The previous screen remains in memory, preserving its state
+6. The `BottomNavigationBar` highlights the newly selected tab
+
+<Tip>
+  The navigation system is designed for smooth, instant transitions between tabs with no loading delays or state loss.
+</Tip>

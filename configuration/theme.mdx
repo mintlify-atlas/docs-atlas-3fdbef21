@@ -1,0 +1,174 @@
+---
+title: Theme customization
+description: Customize the Material Design 3 theme and color scheme in the KMUTNB Mobile App
+---
+
+The KMUTNB Mobile App uses Material Design 3 (Material You) with a custom color scheme based on an orange seed color. The theming system provides a modern, cohesive look across the entire application.
+
+## Default theme configuration
+
+The app's theme is configured in the `main.dart` file using Flutter's `ThemeData` with Material 3 enabled:
+
+```dart lib/main.dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'KMUTNB App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        useMaterial3: true,
+      ),
+      home: const MainScreen(),
+    );
+  }
+}
+```
+
+## Color scheme
+
+The app uses a color scheme generated from an orange seed color:
+
+```dart
+colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange)
+```
+
+This automatically generates a complete color palette including:
+- Primary colors (derived from orange)
+- Secondary colors
+- Tertiary colors
+- Surface colors
+- Error colors
+- Container colors
+
+The bottom navigation bar uses an additional accent color:
+
+```dart lib/main.dart
+BottomNavigationBar(
+  items: const <BottomNavigationBarItem>[
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.map),
+      label: 'Map',
+    ),
+  ],
+  currentIndex: _selectedIndex,
+  selectedItemColor: Colors.amber[800],
+  onTap: _onItemTapped,
+)
+```
+
+## Material Design 3
+
+The app enables Material 3 with the `useMaterial3: true` flag, which provides:
+
+- Modern component designs with updated shapes and elevations
+- Dynamic color support
+- Enhanced accessibility features
+- Smoother animations and transitions
+- Updated typography scale
+
+## Customizing the theme
+
+### Changing the seed color
+
+To change the app's color scheme, modify the `seedColor` parameter:
+
+```dart
+theme: ThemeData(
+  colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+  useMaterial3: true,
+)
+```
+
+You can use any Material color or create a custom color:
+
+```dart
+colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFFFF6B00))
+```
+
+<Tip>
+  Choose a seed color that represents your brand or university colors. The Material 3 system will automatically generate harmonious color variations for the entire app.
+</Tip>
+
+### Customizing specific colors
+
+For more control, you can override specific colors in the color scheme:
+
+```dart
+theme: ThemeData(
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: Colors.orange,
+    brightness: Brightness.light,
+    primary: Colors.orange[700],
+    secondary: Colors.amber[800],
+  ),
+  useMaterial3: true,
+)
+```
+
+### Updating the navigation bar color
+
+To change the selected item color in the bottom navigation bar, modify the `selectedItemColor` in `main.dart:69`:
+
+```dart
+BottomNavigationBar(
+  // ... other properties
+  selectedItemColor: Colors.deepOrange[800],  // Custom color
+  onTap: _onItemTapped,
+)
+```
+
+### Adding dark theme support
+
+You can add dark theme support by providing a `darkTheme` parameter:
+
+```dart
+MaterialApp(
+  debugShowCheckedModeBanner: false,
+  title: 'KMUTNB App',
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+    useMaterial3: true,
+  ),
+  darkTheme: ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.orange,
+      brightness: Brightness.dark,
+    ),
+    useMaterial3: true,
+  ),
+  themeMode: ThemeMode.system,  // Follows system theme
+  home: const MainScreen(),
+)
+```
+
+### Customizing the app bar
+
+The app bar uses the `inversePrimary` color from the theme. To customize it:
+
+```dart
+AppBar(
+  backgroundColor: Theme.of(context).colorScheme.primaryContainer,  // Custom background
+  title: const Text('KMUTNB App'),
+)
+```
+
+<Tip>
+  After making theme changes, hot reload your app with `r` in the terminal or use hot restart with `R` to see the changes immediately.
+</Tip>
+
+## Theme testing
+
+Test your theme changes across different screens:
+
+1. **Home tab**: Check how the WebView integrates with the app bar color
+2. **Map tab**: Verify the floating action button color matches your theme
+3. **Bottom navigation**: Ensure selected and unselected states are clearly distinguishable
+4. **App bar**: Confirm the app bar color provides good contrast with the title text

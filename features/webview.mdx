@@ -1,0 +1,98 @@
+---
+title: WebView integration
+description: Learn how the KMUTNB Mobile App integrates the university website using Flutter's WebView component
+---
+
+## Overview
+
+The KMUTNB Mobile App provides seamless access to the official KMUTNB website (https://kmutnb.ac.th/) through an embedded WebView. This allows you to browse the university website directly within the app without switching to an external browser.
+
+## WebViewScreen implementation
+
+The `WebViewScreen` is a stateful widget that manages the WebView component. Located in `lib/screens/webview_screen.dart`, it initializes and configures the WebView controller with the necessary settings.
+
+```dart
+class WebViewScreen extends StatefulWidget {
+  const WebViewScreen({super.key});
+
+  @override
+  State<WebViewScreen> createState() => _WebViewScreenState();
+}
+```
+
+## WebViewController configuration
+
+The WebView controller is configured in the `_initWebViewController()` method with several important settings:
+
+```dart
+void _initWebViewController() {
+  _webViewController = WebViewController()
+    ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setBackgroundColor(const Color(0x00000000))
+    ..setNavigationDelegate(
+      NavigationDelegate(
+        onProgress: (int progress) {
+          // Update loading bar
+        },
+        onPageStarted: (String url) {},
+        onPageFinished: (String url) {},
+        onWebResourceError: (WebResourceError error) {},
+      ),
+    )
+    ..loadRequest(Uri.parse('https://kmutnb.ac.th/'));
+}
+```
+
+### JavaScript mode
+
+<Note>
+  The WebView is configured with `JavaScriptMode.unrestricted` to ensure full compatibility with the KMUTNB website, which requires JavaScript for interactive features.
+</Note>
+
+This setting enables all JavaScript functionality on the loaded web pages, allowing dynamic content, forms, and interactive elements to work properly.
+
+### Navigation delegate
+
+The `NavigationDelegate` provides hooks for monitoring the WebView's loading states:
+
+- **onProgress**: Tracks loading progress (can be used for progress indicators)
+- **onPageStarted**: Called when a page begins loading
+- **onPageFinished**: Called when a page completes loading
+- **onWebResourceError**: Handles any errors that occur during resource loading
+
+<Info>
+  The navigation delegate callbacks are currently empty but can be extended to add loading indicators, error handling, or analytics tracking.
+</Info>
+
+## Loading the KMUTNB website
+
+The WebView automatically loads the official KMUTNB website on initialization:
+
+```dart
+..loadRequest(Uri.parse('https://kmutnb.ac.th/'));
+```
+
+This happens in the `initState()` lifecycle method, ensuring the website starts loading as soon as the screen is displayed:
+
+```dart
+@override
+void initState() {
+  super.initState();
+  _initWebViewController();
+}
+```
+
+## Widget rendering
+
+The WebView is rendered using the `WebViewWidget` component, which takes the configured controller:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return WebViewWidget(controller: _webViewController);
+}
+```
+
+<Tip>
+  The WebView maintains its state and browsing history, allowing you to navigate through pages and use the browser's back/forward functionality.
+</Tip>

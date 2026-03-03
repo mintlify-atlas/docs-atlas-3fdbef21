@@ -1,0 +1,136 @@
+---
+title: Google Maps integration
+description: Explore how the KMUTNB Mobile App integrates Google Maps to display the campus location
+---
+
+## Overview
+
+The KMUTNB Mobile App includes an interactive Google Maps view that shows the location of the Faculty of Technology and Management on the KMUTNB campus. You can pan, zoom, and interact with the map to explore the area.
+
+## MapScreen implementation
+
+The `MapScreen` is a stateful widget located in `lib/screens/map_screen.dart` that manages the Google Maps integration:
+
+```dart
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+```
+
+## Campus coordinates
+
+The map centers on the Faculty of Technology and Management at KMUTNB using precise coordinates:
+
+```dart
+// Location coordinates for Faculty of Technology and Management
+static const LatLng _kmutnbLocation = LatLng(14.159051, 101.345455);
+```
+
+<Info>
+  The coordinates (14.159051, 101.345455) point to the Faculty of Technology and Management at King Mongkut's University of Technology North Bangkok.
+</Info>
+
+## Initial camera position
+
+The map initializes with a centered view and appropriate zoom level:
+
+```dart
+static const CameraPosition _initialCameraPosition = CameraPosition(
+  target: _kmutnbLocation,
+  zoom: 15,
+);
+```
+
+The zoom level of 15 provides a good balance between showing the campus area and surrounding context.
+
+## Map marker
+
+A marker is placed on the map to highlight the faculty location. The marker is added during the widget's initialization:
+
+```dart
+@override
+void initState() {
+  super.initState();
+  // Add marker for the Faculty of Technology and Management
+  _markers.add(
+    const Marker(
+      markerId: MarkerId('kmutnb_faculty'),
+      position: _kmutnbLocation,
+      infoWindow: InfoWindow(
+        title: 'Faculty of Technology and Management',
+        snippet: 'KMUTNB',
+      ),
+    ),
+  );
+}
+```
+
+<Tip>
+  Tap on the marker to see the info window displaying "Faculty of Technology and Management" and "KMUTNB".
+</Tip>
+
+## Google Map configuration
+
+The map is configured with several settings for optimal user experience:
+
+```dart
+GoogleMap(
+  initialCameraPosition: _initialCameraPosition,
+  markers: _markers,
+  mapType: MapType.normal,
+  myLocationButtonEnabled: false,
+  myLocationEnabled: false,
+  zoomControlsEnabled: true,
+  onMapCreated: (GoogleMapController controller) {
+    _mapController = controller;
+  },
+)
+```
+
+### Map settings explained
+
+- **mapType**: Set to `MapType.normal` for the standard road map view
+- **myLocationButtonEnabled**: Disabled as the app focuses on campus location
+- **myLocationEnabled**: User location tracking is turned off
+- **zoomControlsEnabled**: Zoom controls are enabled for easy navigation
+- **onMapCreated**: Callback stores the map controller for programmatic control
+
+## Floating action button for recentering
+
+The map includes a floating action button that recenters the view on the faculty location:
+
+```dart
+floatingActionButton: FloatingActionButton(
+  onPressed: () {
+    _mapController?.animateCamera(
+      CameraUpdate.newCameraPosition(_initialCameraPosition),
+    );
+  },
+  child: const Icon(Icons.center_focus_strong),
+),
+```
+
+<Tip>
+  If you've panned away from the campus location, tap the floating action button with the center focus icon to smoothly animate back to the Faculty of Technology and Management.
+</Tip>
+
+The camera animation provides a smooth transition instead of an abrupt jump, enhancing the user experience.
+
+## Controller lifecycle management
+
+The map controller is properly disposed of when the screen is removed to prevent memory leaks:
+
+```dart
+@override
+void dispose() {
+  _mapController?.dispose();
+  super.dispose();
+}
+```
+
+<Note>
+  Proper disposal of the map controller ensures efficient memory usage and prevents potential crashes when navigating away from the map screen.
+</Note>

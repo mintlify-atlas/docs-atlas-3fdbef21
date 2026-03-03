@@ -1,80 +1,141 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get the KMUTNB Mobile App up and running in minutes with this step-by-step guide.
 ---
 
-## Get started in three steps
+# Quickstart
 
-Get your documentation site running locally and make your first customization.
+Get started with the KMUTNB Mobile App quickly by following these steps. You'll have the app running on your device or emulator in no time.
 
-### Step 1: Set up your local environment
+## Prerequisites
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+Before you begin, make sure you have:
+- Flutter SDK 3.7.0+ installed
+- Dart SDK 3.6.0+ installed
+- Android Studio or Xcode (depending on your target platform)
+- A Google Maps API key ([get one here](https://console.cloud.google.com/))
+
+## Get started
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the KMUTNB Mobile App repository to your local machine:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```bash
+    git clone https://github.com/jezlol/Mobile_final_f1.git
+    cd Mobile_final_f1
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    Install all required Flutter packages:
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    ```bash
+    flutter pub get
+    ```
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    This will install Google Maps Flutter, WebView Flutter, Geolocator, and other dependencies.
+  </Step>
+  
+  <Step title="Configure Google Maps API key">
+    Add your Google Maps API key to the platform-specific configuration files:
+    
+    **For Android** (`android/app/src/main/AndroidManifest.xml`):
+    ```xml
+    <meta-data
+      android:name="com.google.android.geo.API_KEY"
+      android:value="YOUR_API_KEY_HERE"/>
+    ```
+    
+    **For iOS** (`ios/Runner/AppDelegate.swift`):
+    ```swift
+    GMSServices.provideAPIKey("YOUR_API_KEY_HERE")
+    ```
+    
+    See the [Google Maps configuration](/configuration/google-maps) guide for detailed instructions.
+  </Step>
+  
+  <Step title="Connect a device or start an emulator">
+    Connect your Android or iOS device, or start an emulator:
+    
+    ```bash
+    flutter devices
+    ```
+    
+    This command will show all available devices.
+  </Step>
+  
+  <Step title="Run the app">
+    Launch the app on your connected device or emulator:
+    
+    ```bash
+    flutter run
+    ```
+    
+    The app will compile and launch on your device.
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+## What you'll see
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+Once the app launches, you'll see two main screens accessible via bottom navigation:
 
-### Step 3: Go live
+1. **Home tab**: Displays the KMUTNB university website (https://kmutnb.ac.th/) in an embedded WebView
+2. **Map tab**: Shows an interactive Google Maps view centered on the Faculty of Technology and Management with a marker
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+## Understanding the app structure
+
+The KMUTNB Mobile App is built with a simple, clean architecture:
+
+```dart
+// Main app structure from lib/main.dart
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'KMUTNB App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        useMaterial3: true,
+      ),
+      home: const MainScreen(),
+    );
+  }
+}
+```
+
+The app uses:
+- **Material Design 3** with an orange color scheme
+- **IndexedStack** to preserve screen state when switching tabs
+- **Bottom navigation** for easy switching between WebView and Map screens
+
+## Project files
+
+Key files in the project:
+
+- `lib/main.dart` - App entry point and navigation setup
+- `lib/screens/webview_screen.dart` - WebView implementation
+- `lib/screens/map_screen.dart` - Google Maps implementation
+- `pubspec.yaml` - Dependencies and project configuration
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Explore features" icon="star" href="/features/webview">
+    Learn about WebView and Maps integration
+  </Card>
+  <Card title="Customize the theme" icon="palette" href="/configuration/theme">
+    Change colors and styling
+  </Card>
+  <Card title="Build for production" icon="hammer" href="/development/building">
+    Create release builds for deployment
+  </Card>
+  <Card title="View project structure" icon="folder" href="/development/project-structure">
+    Understand the codebase organization
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

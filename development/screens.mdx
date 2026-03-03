@@ -1,0 +1,246 @@
+---
+title: Screens
+description: Detailed documentation of the screen widgets and navigation structure in the KMUTNB Mobile App
+---
+
+The KMUTNB Mobile App consists of three main widget layers: the root app widget, the main navigation screen, and two feature screens (WebView and Map).
+
+## MyApp - Root widget
+
+The `MyApp` widget (lib/main.dart:9) is the root of your application. It's a stateless widget that configures the MaterialApp.
+
+<Accordion title="MyApp implementation">
+```dart
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'KMUTNB App',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+        useMaterial3: true,
+      ),
+      home: const MainScreen(),
+    );
+  }
+}
+```
+</Accordion>
+
+### Key configuration
+
+- **debugShowCheckedModeBanner**: Set to `false` to hide the debug banner
+- **title**: App title displayed in task switcher
+- **theme**: Material 3 theme with orange seed color
+- **home**: MainScreen as the initial route
+
+## MainScreen - Navigation controller
+
+The `MainScreen` widget (lib/main.dart:26) is a stateful widget that manages bottom navigation between the WebView and Map screens.
+
+### State management
+
+The screen maintains two key pieces of state:
+
+- `_selectedIndex`: Currently selected tab index (0 for Home, 1 for Map)
+- `_screens`: List of screen widgets to display
+
+<Accordion title="MainScreen implementation">
+```dart
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+  final List<Widget> _screens = [
+    const WebViewScreen(),
+    const MapScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text('KMUTNB App'),
+      ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Map',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+```
+</Accordion>
+
+### Navigation strategy
+
+The app uses `IndexedStack` to preserve the state of both screens when switching between tabs. This means the WebView won't reload and the map position won't reset when you navigate away and back.
+
+## WebViewScreen - University website
+
+The `WebViewScreen` widget (lib/screens/webview_screen.dart:4) displays the KMUTNB website in an embedded WebView.
+
+### WebView configuration
+
+The screen initializes a `WebViewController` with the following settings:
+
+- **JavaScript**: Enabled with `JavaScriptMode.unrestricted`
+- **URL**: Loads https://kmutnb.ac.th/
+- **Navigation delegate**: Handles page loading events
+- **Background**: Transparent background color
+
+<Accordion title="WebViewScreen implementation">
+```dart
+class _WebViewScreenState extends State<WebViewScreen> {
+  // Controller for the WebView
+  late WebViewController _webViewController;
+  
+  // Initialize WebView controller
+  void _initWebViewController() {
+    _webViewController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (int progress) {
+            // Update loading bar
+          },
+          onPageStarted: (String url) {},
+          onPageFinished: (String url) {},
+          onWebResourceError: (WebResourceError error) {},
+        ),
+      )
+      ..loadRequest(Uri.parse('https://kmutnb.ac.th/'));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initWebViewController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WebViewWidget(controller: _webViewController);
+  }
+}
+```
+</Accordion>
+
+### Navigation delegate callbacks
+
+The navigation delegate provides hooks for:
+
+- `onProgress`: Track loading progress (0-100)
+- `onPageStarted`: Called when page starts loading
+- `onPageFinished`: Called when page finishes loading
+- `onWebResourceError`: Handle loading errors
+
+## MapScreen - Campus location
+
+The `MapScreen` widget (lib/screens/map_screen.dart:4) displays an interactive Google Maps view centered on the Faculty of Technology and Management.
+
+### Location configuration
+
+The screen defines the faculty location coordinates:
+
+- **Latitude**: 14.159051
+- **Longitude**: 101.345455
+- **Initial zoom**: 15
+
+<Accordion title="MapScreen implementation">
+```dart
+class _MapScreenState extends State<MapScreen> {
+  // Location coordinates for Faculty of Technology and Management
+  static const LatLng _kmutnbLocation = LatLng(14.159051, 101.345455);
+
+  // Initial camera position
+  static const CameraPosition _initialCameraPosition = CameraPosition(
+    target: _kmutnbLocation,
+    zoom: 15,
+  );
+
+  // Set of markers
+  final Set<Marker> _markers = {};
+  GoogleMapController? _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add marker for the Faculty of Technology and Management
+    _markers.add(
+      const Marker(
+        markerId: MarkerId('kmutnb_faculty'),
+        position: _kmutnbLocation,
+        infoWindow: InfoWindow(
+          title: 'Faculty of Technology and Management',
+          snippet: 'KMUTNB',
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GoogleMap(
+        initialCameraPosition: _initialCameraPosition,
+        markers: _markers,
+        mapType: MapType.normal,
+        myLocationButtonEnabled: false,
+        myLocationEnabled: false,
+        zoomControlsEnabled: true,
+        onMapCreated: (GoogleMapController controller) {
+          _mapController = controller;
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _mapController?.animateCamera(
+            CameraUpdate.newCameraPosition(_initialCameraPosition),
+          );
+        },
+        child: const Icon(Icons.center_focus_strong),
+      ),
+    );
+  }
+}
+```
+</Accordion>
+
+### Map features
+
+- **Marker**: Displays the faculty location with an info window
+- **Floating action button**: Re-centers the map to the initial position with smooth animation
+- **Zoom controls**: Enabled for user interaction
+- **Location services**: Disabled (myLocationEnabled: false)
+- **Map type**: Normal view (not satellite or terrain)

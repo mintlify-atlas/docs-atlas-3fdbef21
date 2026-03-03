@@ -1,0 +1,199 @@
+---
+title: Android setup
+description: Configure the KMUTNB Mobile App for Android deployment with required SDKs and permissions
+---
+
+This guide covers the Android-specific configuration needed to build and run the KMUTNB Mobile App on Android devices and emulators.
+
+## Requirements
+
+Before setting up Android, ensure you have:
+
+- Flutter SDK 3.7.0 or higher
+- Dart SDK 3.7.0 or higher
+- Android SDK (installed via Android Studio)
+- Android Studio or VS Code with Flutter extensions
+
+## Android SDK setup
+
+<Steps>
+  <Step title="Install Android Studio">
+    Download and install [Android Studio](https://developer.android.com/studio) which includes the Android SDK, SDK Manager, and AVD Manager.
+  </Step>
+  
+  <Step title="Install SDK components">
+    Open Android Studio and navigate to **Settings** > **Appearance & Behavior** > **System Settings** > **Android SDK**.
+    
+    Install the following components:
+    - Android SDK Platform (API 21 or higher recommended)
+    - Android SDK Build-Tools
+    - Android SDK Platform-Tools
+    - Android SDK Command-line Tools
+  </Step>
+  
+  <Step title="Configure Flutter">
+    Run `flutter doctor` in your terminal to verify that Flutter can detect your Android SDK installation. If issues are found, follow the suggestions provided.
+  </Step>
+  
+  <Step title="Set up an Android device or emulator">
+    Either:
+    - Connect a physical Android device with USB debugging enabled
+    - Create an Android Virtual Device (AVD) using AVD Manager in Android Studio
+    
+    Verify devices are detected with `flutter devices`.
+  </Step>
+</Steps>
+
+## AndroidManifest.xml configuration
+
+The app's Android configuration is located at:
+
+```
+android/app/src/main/AndroidManifest.xml
+```
+
+### Application metadata
+
+The manifest defines the app label and icon:
+
+```xml
+<application
+    android:label="fin_1"
+    android:name="${applicationName}"
+    android:icon="@mipmap/ic_launcher">
+```
+
+You can customize the `android:label` to change the app name displayed on Android devices.
+
+### Required permissions
+
+The app requires the following permissions for Google Maps and location services:
+
+```xml
+<!-- Location permissions -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.INTERNET" />
+```
+
+**Permission breakdown:**
+
+- `ACCESS_FINE_LOCATION`: Allows precise location access for accurate map positioning
+- `ACCESS_COARSE_LOCATION`: Allows approximate location access
+- `INTERNET`: Required for loading map tiles and the KMUTNB website in the WebView
+
+<Warning>
+  Starting with Android 6.0 (API level 23), location permissions are considered "dangerous" and require runtime permission requests. The `geolocator` package (version 13.0.2) used in this app handles runtime permission requests automatically.
+</Warning>
+
+### Google Maps API key
+
+Add your Google Maps API key to the manifest:
+
+```xml
+<!-- Google Maps API Key -->
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_API_KEY_HERE" />
+```
+
+Replace `YOUR_API_KEY_HERE` with your actual API key from Google Cloud Console. See the [Google Maps setup](/configuration/google-maps) guide for detailed instructions.
+
+### Activity configuration
+
+The MainActivity is configured with:
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:launchMode="singleTop"
+    android:taskAffinity=""
+    android:theme="@style/LaunchTheme"
+    android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+    android:hardwareAccelerated="true"
+    android:windowSoftInputMode="adjustResize">
+```
+
+Key attributes:
+- `android:exported="true"`: Allows the activity to be launched by other apps and the system
+- `android:hardwareAccelerated="true"`: Enables hardware acceleration for better performance
+- `android:configChanges`: Handles configuration changes without restarting the activity
+
+## Building for Android
+
+### Development build
+
+To build and run the app in debug mode:
+
+```bash
+flutter run
+```
+
+Or specify the Android device:
+
+```bash
+flutter run -d android
+```
+
+### Release build
+
+To create a release APK:
+
+```bash
+flutter build apk --release
+```
+
+To create an app bundle (recommended for Google Play Store):
+
+```bash
+flutter build appbundle --release
+```
+
+The output files will be located at:
+- APK: `build/app/outputs/flutter-apk/app-release.apk`
+- App Bundle: `build/app/outputs/bundle/release/app-release.aab`
+
+<Tip>
+  Use app bundles for Play Store distribution as they allow Google Play to generate optimized APKs for different device configurations, resulting in smaller download sizes.
+</Tip>
+
+## Gradle configuration
+
+The app uses the Kotlin build script located at:
+
+```
+android/app/build.gradle.kts
+```
+
+Key Gradle settings include:
+- Compile SDK version
+- Minimum SDK version (must support Google Maps SDK)
+- Target SDK version
+- Application ID
+- Version code and version name
+
+## Troubleshooting
+
+### Map not displaying
+
+If the Google Map doesn't display:
+1. Verify your API key is correctly added to AndroidManifest.xml
+2. Check that Maps SDK for Android is enabled in Google Cloud Console
+3. Ensure your API key restrictions allow your app's package name and SHA-1 fingerprint
+4. Run `flutter clean` and rebuild the app
+
+### Permission denied errors
+
+If you encounter location permission errors:
+1. Check that permissions are declared in AndroidManifest.xml
+2. Test on a physical device if the emulator has issues
+3. Grant permissions manually in device Settings > Apps > KMUTNB App > Permissions
+
+### Build failures
+
+If builds fail:
+1. Run `flutter doctor` to check for issues
+2. Run `flutter clean` to clear build cache
+3. Update Flutter and dependencies: `flutter pub upgrade`
+4. Check that your Android SDK is up to date in Android Studio
